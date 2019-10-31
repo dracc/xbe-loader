@@ -17,11 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if 1
-void write_log(const char* format, ...);
-void write_log_crit(const char* format, ...);
-#define debugPrint(x, ...) write_log(x, ## __VA_ARGS__)
-#endif
+#include "write_log.h"
 
 #include <hal/debug.h>
 #include <assert.h>
