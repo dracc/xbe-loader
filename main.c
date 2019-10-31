@@ -1,4 +1,4 @@
-#define QUIET
+//#define QUIET
 #define USE_XISO
 //#define HOOK_NIC
 
@@ -129,15 +129,15 @@ static void memory_statistics() {
     MmQueryStatistics(&ms);
     write_log("Memory statistics:\n");
 #define PRINT(stat) write_log("- " #stat ": %d\n", ms.stat);
-    PRINT(TotalPhysicalPages)
-        PRINT(AvailablePages)
-        PRINT(VirtualMemoryBytesCommitted)
-        PRINT(VirtualMemoryBytesReserved)
-        PRINT(CachePagesCommitted)
-        PRINT(PoolPagesCommitted)
-        PRINT(StackPagesCommitted)
-        PRINT(ImagePagesCommitted)
-        }
+    PRINT(TotalPhysicalPages);
+    PRINT(AvailablePages);
+    PRINT(VirtualMemoryBytesCommitted);
+    PRINT(VirtualMemoryBytesReserved);
+    PRINT(CachePagesCommitted);
+    PRINT(PoolPagesCommitted);
+    PRINT(StackPagesCommitted);
+    PRINT(ImagePagesCommitted);
+}
 
 
 static uint32_t LookupKernelExport(unsigned int ordinal) {
@@ -395,11 +395,12 @@ static void xbe_starter_thread(void* _xbe, void* unused) {
 }
 
 static XbeSection* find_xbe_section(Xbe* xbe, const char* name) {
-  XbeSection* sections = (XbeSection*)xbe->section_address;
-  for(unsigned int i = 0; i < xbe->section_count; i++) {
-    XbeSection* section = &sections[i];
-    if (!strcmp((char*)section->name, name)) {
-      return section;
+    XbeSection* sections = (XbeSection*)xbe->section_address;
+    for(unsigned int i = 0; i < xbe->section_count; i++) {
+        XbeSection* section = &sections[i];
+        if (!strcmp((char*)section->name, name)) {
+            return section;
+        }
     }
     return NULL;
 }
@@ -769,10 +770,10 @@ int main() {
 
     //FIXME: Allocate the space right behind our binary
     //       We do this, so other code can't mess up the heap of the main game
-  
+
 #ifndef QUIET
     // Setup debug output
-    XVideoSetMode(640, 480, 32, REFRESH_DEFAULT);
+    XVideoSetMode(1280, 720, 16, REFRESH_DEFAULT);
 #endif
 
 #if 1
@@ -781,6 +782,8 @@ int main() {
         assert(XeImageFileName->Length < sizeof(loader_path));
         memcpy(loader_path, XeImageFileName->Buffer, XeImageFileName->Length);
         loader_path[XeImageFileName->Length] = '\0';
+    } else {
+        write_log("strlen(loader_path):  %d\n", strlen(loader_path));
     }
     write_log("Loader is '%s'\n", loader_path);
 #endif
