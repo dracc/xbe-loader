@@ -135,12 +135,12 @@ static void IoMarkIrpPending(PIRP Irp) {
   IrpSp->Control |= SL_PENDING_RETURNED;
 }
 
-#define _OBJECT_STRING(x, str)   \
-  OCHAR x ## Buffer[] = str;     \
-  OBJECT_STRING x = {            \
-    sizeof(str) - sizeof(OCHAR), \
-    sizeof(str),                 \
-    x ## Buffer                  \
+#define _OBJECT_STRING(x, str)                  \
+  OCHAR x ## Buffer[] = str;                    \
+  OBJECT_STRING x = {                           \
+    sizeof(str) - sizeof(OCHAR),                \
+    sizeof(str),                                \
+    x ## Buffer                                 \
   };
 
 

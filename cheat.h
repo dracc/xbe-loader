@@ -23,7 +23,7 @@ typedef struct _IRPx {
     LARGE_INTEGER AllocationSize;
   } Overlay; // +36, +40
 #endif
-uint8_t pad[4]; //FIXME: Where should this be?!
+  uint8_t pad[4]; //FIXME: Where should this be?!
   PVOID UserBuffer; // + 48
   PFILE_SEGMENT_ELEMENT SegmentArray;
   ULONG LockedBufferLength;
