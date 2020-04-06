@@ -1,4 +1,4 @@
-//#define QUIET
+#define QUIET
 #define USE_XISO
 //#define HOOK_NIC
 
@@ -15,6 +15,8 @@
 #include <hal/xbox.h>
 #include <hal/fileio.h>
 #include <xboxkrnl/xboxkrnl.h>
+#include <nxdk/mount.h>
+#include <windows.h>
 #include "write_log.h"
 
 #ifndef QUIET
@@ -777,6 +779,7 @@ int main() {
 #endif
 
 #if 1
+    Sleep(2000);
     // Retrieve path to loader. This only happens the first time
     if (strlen(loader_path) == 0) {
         assert(XeImageFileName->Length < sizeof(loader_path));
@@ -867,7 +870,7 @@ int main() {
 
     // Mount it where the DVD drive should be
     write_log("Mounting XISO device\n");
-    XMountDrive('D', "\\Device\\XIso0");
+    nxMountDrive('D', "\\Device\\XIso0");
 
     // Pick the default.xbe for startup
     xbe_path_readable = "D:\\default.xbe";
@@ -935,7 +938,7 @@ int main() {
         if (t % 10 == 0) {
             memory_statistics();
         }
-        XSleep(1000);
+        Sleep(1000);
         t++;
     }
 }

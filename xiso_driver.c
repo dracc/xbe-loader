@@ -12,26 +12,17 @@
 #include <assert.h>
 #include <string.h>
 
-#ifdef USE_HTTP
-#include "network.h"
-#include "http_client.h"
-#endif
-
 #include "write_log.h"
 #include "io.h"
 
-
-
-
-
-
 #ifdef USE_HTTP
+#include "network.h"
+#include "http_client.h"
 
 
 const char* host = "192.168.177.1";
 unsigned short host_port = 8000;
 const char* host_path = "/default.iso";
-
 
 
 typedef struct {
@@ -241,15 +232,8 @@ static int iso_handle;
 #endif
 
 
-
-
-
-
-
-
 _OBJECT_STRING(xiso_driver_device_name, "\\Device\\XIso0");
 _OBJECT_STRING(xiso_driver_dos_device_name, "\\??\\XIso0:");
-
 
 static const unsigned int sector_size = 2048;
 
@@ -344,8 +328,6 @@ static __attribute__((__stdcall__)) NTSTATUS irp_read(IN PDEVICE_OBJECT DeviceOb
         MmUnmapIoSpace(mapped_destination, len);
     }
 
-
-
 #ifdef USE_ASYNC
     // Information should contain how many bytes will be read?
     Irp->IoStatus.Information = IrpSp->Parameters.Read.Length;
@@ -357,7 +339,6 @@ static __attribute__((__stdcall__)) NTSTATUS irp_read(IN PDEVICE_OBJECT DeviceOb
 #endif
 
 #else
-
     // Finish synchronously?! absolute madlad style!
 
     int newFilePointer;

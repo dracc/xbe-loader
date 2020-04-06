@@ -8,13 +8,12 @@
 #include "lwip/netif.h"
 #include "lwip/sys.h"
 #include "lwip/tcpip.h"
-#include "lwip/timers.h"
+#include "lwip/timeouts.h"
 #include "netif/etharp.h"
 #include "pktdrv.h"
 
 
 #define USE_DHCP         0
-#define PKT_TMR_INTERVAL 1 /* ms */
 #define DEBUGGING        0
 
 
@@ -25,19 +24,10 @@ err_t nforceif_init(struct netif *netif);
 
 static struct netif nforce_netif;
 
-static void packet_timer(void *arg);
-
 static void tcpip_init_done(void *arg)
 {
     sys_sem_t *init_complete = arg;
     sys_sem_signal(init_complete);
-}
-
-static void packet_timer(void *arg)
-{
-    LWIP_UNUSED_ARG(arg);
-    Pktdrv_ReceivePackets();
-    sys_timeout(PKT_TMR_INTERVAL, packet_timer, NULL);
 }
 
 int network_setup() {
@@ -45,14 +35,12 @@ int network_setup() {
     sys_sem_t init_complete;
     const ip4_addr_t *ip;
 
-
 #if DEBUGGING
     asm volatile ("jmp .");
     debug_flags = LWIP_DBG_ON;
 #else
     debug_flags = 0;
 #endif
-
 
     static ip4_addr_t ipaddr, netmask, gw;
 #if USE_DHCP
@@ -65,8 +53,6 @@ int network_setup() {
     IP4_ADDR(&netmask, 255,255,255,0);
 #endif
 
-
-
     /* Initialize the TCP/IP stack. Wait for completion. */
     sys_sem_new(&init_complete, 0);
     tcpip_init(tcpip_init_done, &init_complete);
@@ -74,7 +60,7 @@ int network_setup() {
     sys_sem_free(&init_complete);
 
     g_pnetif = netif_add(&nforce_netif, &ipaddr, &netmask, &gw,
-                         NULL, nforceif_init, ethernet_input);
+                         NULL, nforceif_init, tcpip_input);
     if (!g_pnetif) {
         return -1;
     }
@@ -86,11 +72,9 @@ int network_setup() {
     dhcp_start(g_pnetif);
 #endif
 
-    packet_timer(NULL);
-
 #if USE_DHCP
     debugPrint("Waiting for DHCP...\n");
-    while (g_pnetif->dhcp->state != DHCP_STATE_BOUND) {
+    while (dhcp_supplied_address(g_pnetif) == 0) {
         NtYieldExecution();
     }
     debugPrint("DHCP bound!\n");

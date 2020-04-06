@@ -15,13 +15,68 @@
 
 extern char* loader_path;
 
-void write_log(const char* format, ...) {
+void log_to_file(const char* text) {
+    // Initialize log and pick wether we want to overwrite, or append
+    static bool initialize_log __PERSIST = true;
+    const char* access;
+    if (initialize_log) {
+        access = "wb";
+        initialize_log = false;
+    } else {
+        access = "ab";
+    }
+
+    // The kernel does not like relocating the RTL_CRITICAL_SECTION
+    // That means we have to create a new one
+    //FIXME: What happens to the old one?!
+    static bool initialize_section = true;
+    static RTL_CRITICAL_SECTION log_section;
+    if (initialize_section) {
+        RtlInitializeCriticalSection(&log_section);
+        initialize_section = false;
+    }
+
+    // We have to protect the log from access of multiple threads
+    RtlEnterCriticalSection(&log_section);
+
+    // Generate the log path
+    //FIXME: Do this somewhere else?
+    char loader_directory[520];
+    strcpy(loader_directory, loader_path);
+    char *lastSlash = strrchr(loader_directory, '\\');
+    *lastSlash = '\0';
+    char log_path[520];
+    sprintf(log_path, "%s\\log.txt", loader_directory);
+
+    // Open file and if successful, write to it
+    FILE* f = fopen(log_path, access);
+    if (f != NULL) {
+        fwrite(text, 1, strlen(text), f);
+        fclose(f);
+    } else {
 #ifndef QUIET
-    va_list argList;
-    va_start(argList, format);
-    debugPrint(format, argList);
-    va_end(argList);
+        debugPrint("Failed to open log\n");
+#else
+        //FIXME: Do some kind of panic here? LED maybe?
 #endif
+    }
+
+    // Print message to display
+#ifndef QUIET
+    debugPrint(text);
+#endif
+
+    // Leave the multi-threading critical section
+    RtlLeaveCriticalSection(&log_section);
+}
+
+void write_log(const char* format, ...) {
+    va_list argList;
+    char buffer[512];
+    va_start(argList, format);
+    vsprintf(buffer, format, argList);
+    va_end(argList);
+    log_to_file(buffer);
 }
 
 void write_log_crit(const char* format, ...) {
@@ -63,57 +118,5 @@ void write_log_crit(const char* format, ...) {
         internal = false;
     }
 #endif
-
-    // Initialize log and pick wether we want to overwrite, or append
-    static bool initialize_log __PERSIST = true;
-    const char* access;
-    if (initialize_log) {
-        access = "wb";
-        initialize_log = false;
-    } else {
-        access = "ab";
-    }
-
-    // The kernel does not like relocating the RTL_CRITICAL_SECTION
-    // That means we have to create a new one
-    //FIXME: What happens to the old one?!
-    static bool initialize_section = true;
-    static RTL_CRITICAL_SECTION log_section;
-    if (initialize_section) {
-        RtlInitializeCriticalSection(&log_section);
-        initialize_section = false;
-    }
-
-    // We have to protect the log from access of multiple threads
-    RtlEnterCriticalSection(&log_section);
-
-    // Generate the log path
-    //FIXME: Do this somewhere else?
-    char loader_directory[520];
-    strcpy(loader_directory, loader_path);
-    char *lastSlash = strrchr(loader_directory, '\\');
-    *lastSlash = '\0';
-    char log_path[520];
-    sprintf(log_path, "%s\\log.txt", loader_directory);
-
-    // Open file and if successful, write to it
-    FILE* f = fopen(log_path, access);
-    if (f != NULL) {
-        fwrite(buffer, 1, strlen(buffer), f);
-        fclose(f);
-    } else {
-#ifndef QUIET
-        debugPrint("Failed to open log\n");
-#else
-        //FIXME: Do some kind of panic here? LED maybe?
-#endif
-    }
-
-    // Print message to display
-#ifndef QUIET
-    debugPrint(buffer);
-#endif
-
-    // Leave the multi-threading critical section
-    RtlLeaveCriticalSection(&log_section);
+    log_to_file(buffer);
 }

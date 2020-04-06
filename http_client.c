@@ -19,7 +19,7 @@
 
 #include "write_log.h"
 
-#define assert(x) if (!(x)) { debugPrint("\nAssert failed '%s' in %s:%d\n\n", #x, __FILE__, __LINE__); }
+#include <assert.h>
 
 #include <hal/debug.h>
 
