@@ -16,7 +16,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "fixes.h"
 
 #if 1
 void write_log(const char* format, ...);
@@ -24,10 +23,8 @@ void write_log_crit(const char* format, ...);
 #define debugPrint(x, ...) write_log(x, ## __VA_ARGS__)
 #endif
 
-#define assert(x) if (!(x)) { debugPrint("\nAssert failed '%s' in %s:%d\n\n", #x, __FILE__, __LINE__); }
-
-#include <xboxrt/debug.h>
-
+#include <hal/debug.h>
+#include <assert.h>
 #include "network.h"
 
 

@@ -8,7 +8,6 @@
 #include "lwip/netif.h"
 #include "lwip/sys.h"
 #include "lwip/tcpip.h"
-#include "lwip/timers.h"
 #include "netif/etharp.h"
 #include "pktdrv.h"
 

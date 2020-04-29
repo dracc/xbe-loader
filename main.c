@@ -14,10 +14,12 @@
 
 #include <hal/xbox.h>
 #include <hal/fileio.h>
+#include <nxdk/mount.h>
 #include <xboxkrnl/xboxkrnl.h>
+#include <synchapi.h>
 
 #ifndef QUIET
-#include <xboxrt/debug.h>
+#include <hal/debug.h>
 #include <pbkit/pbkit.h>
 #include <hal/video.h>
 #endif
@@ -986,7 +988,7 @@ int main() {
 
   // Mount it where the DVD drive should be
   write_log("Mounting XISO device\n");
-  XMountDrive('D', "\\Device\\XIso0");
+  nxMountDrive('D', "\\Device\\XIso0");
 
   // Pick the default.xbe for startup
   xbe_path_readable = "D:\\default.xbe";
@@ -1030,7 +1032,7 @@ int main() {
   strcpy(xbe_directory, xbe_path);
   char *lastSlash = strrchr(xbe_directory, '\\');
   *lastSlash = '\0';
-  XMountDrive('D', xbe_directory);
+  nxMountDrive('D', xbe_directory);
   write_log("Remapped DVD drive to '%s'\n", xbe_directory);
 #endif
 
@@ -1054,7 +1056,7 @@ int main() {
     if (t % 10 == 0) {
       memory_statistics();
     }
-    XSleep(1000);
+    Sleep(1000);
     t++;
   }
 }
