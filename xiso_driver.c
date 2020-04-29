@@ -316,11 +316,11 @@ static __attribute__((__stdcall__)) NTSTATUS irp_read(IN PDEVICE_OBJECT DeviceOb
   uint8_t* destination;
   uint64_t offset;
   if (is_cache_request) {
-      offset = 0;
-      destination = IrpSp->Parameters.Read.CacheBuffer;
+    offset = 0;
+    destination = IrpSp->Parameters.Read.CacheBuffer;
   } else {
-      offset = IrpSp->Parameters.Read.BufferOffset;
-      destination = Irp->UserBuffer;
+    offset = IrpSp->Parameters.Read.BufferOffset;
+    destination = Irp->UserBuffer;
   }
 
 #if 1
@@ -350,7 +350,7 @@ static __attribute__((__stdcall__)) NTSTATUS irp_read(IN PDEVICE_OBJECT DeviceOb
   unsigned char bytex = mapped_destination[130];
 
   if (is_cache_request) {
-  //  MmLockUnlockBufferPages(mapped_destination, len, FALSE);
+    //  MmLockUnlockBufferPages(mapped_destination, len, FALSE);
     MmUnmapIoSpace(mapped_destination, len);
   }
 
@@ -401,7 +401,7 @@ static __attribute__((__stdcall__)) NTSTATUS irp_control(IN PDEVICE_OBJECT Devic
   IrpSp = IoGetCurrentIrpStackLocation(Irp);
 
   switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
-  //FIXME: Handle these
+    //FIXME: Handle these
   case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
 
     DISK_GEOMETRY* g = Irp->UserBuffer;
@@ -482,7 +482,7 @@ static __attribute__((__stdcall__)) VOID start_io(IN PDEVICE_OBJECT DeviceObject
     break;
   case IRP_MJ_DEVICE_CONTROL:
     switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
-    //FIXME: Handle these
+      //FIXME: Handle these
     default:
       assert(false);
       break;
@@ -573,6 +573,6 @@ NTSTATUS xiso_driver_create_device(const char* xiso_path) {
 //FIXME: Do this when the device is destroyed?!
 #if 0
 #ifdef USE_HTTP
-  network_cleanup();
+network_cleanup();
 #endif
 #endif

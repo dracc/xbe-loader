@@ -55,9 +55,9 @@ typedef struct {
 } Request;
 
 static void destroy_request(Request* request) {
-	if (request->pcb != NULL) {
-		tcp_close(request->pcb);
-	}
+  if (request->pcb != NULL) {
+    tcp_close(request->pcb);
+  }
   if (request->line_buffer != NULL) {
     free(request->line_buffer);
   }
@@ -75,13 +75,13 @@ static err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t
 static void err_callback(void *arg, err_t err);
 
 void http_client_request(const char* host, unsigned short host_port, const char* abs_path, const char* request_header,
-  void(*header_callback)(const char* field, const char* value, void* user),
-  //FIXME: Add a callback for reporting HTTP status and message length
-  void(*message_callback)(unsigned long long offset, const void* buffer, unsigned long long length, void* user),
-  void(*close_callback)(void* user),
-  void(*error_callback)(void* user),
-  void* user
-) {
+                         void(*header_callback)(const char* field, const char* value, void* user),
+                         //FIXME: Add a callback for reporting HTTP status and message length
+                         void(*message_callback)(unsigned long long offset, const void* buffer, unsigned long long length, void* user),
+                         void(*close_callback)(void* user),
+                         void(*error_callback)(void* user),
+                         void* user
+  ) {
   // Lookup host
   //FIXME: Might want to do this elsewhere?
   ip4_addr_t host_ip;
@@ -92,12 +92,12 @@ void http_client_request(const char* host, unsigned short host_port, const char*
     assert(false);
   }
 #else
-	IP4_ADDR(&host_ip, 192,168,177,1);
+  IP4_ADDR(&host_ip, 192,168,177,1);
   host = ip4addr_ntoa(&host_ip);
 #endif
 
   // Keep track of the request in an object
-	Request* request = malloc(sizeof(Request));
+  Request* request = malloc(sizeof(Request));
   if (request == NULL) {
     assert(false);
   }
@@ -121,16 +121,16 @@ void http_client_request(const char* host, unsigned short host_port, const char*
 
   debugPrint("Will request '%s' from '%s' (%s) port %d\n", request->abs_path, request->host, ip4addr_ntoa(&host_ip), host_port);
 
-	// Create a new PCB for our request
-	request->pcb = tcp_new();
-	if(request->pcb == NULL) {
+  // Create a new PCB for our request
+  request->pcb = tcp_new();
+  if(request->pcb == NULL) {
     request->error_callback(request->user);
 
     destroy_request(request);
 
     return;
-	}
-	tcp_arg(request->pcb, request);
+  }
+  tcp_arg(request->pcb, request);
 
   // We poll ~1000ms; measured in TCP coarse grained steps (500ms per step)
   unsigned int poll_interval = 2;
@@ -143,7 +143,7 @@ void http_client_request(const char* host, unsigned short host_port, const char*
 
   // Connect to the server
   debugPrint("Connecting\n");
-	err_t err = tcp_connect(request->pcb, &host_ip, host_port, connected_callback);
+  err_t err = tcp_connect(request->pcb, &host_ip, host_port, connected_callback);
   if (err != ERR_OK) {
     debugPrint("Failed to connect\n");
   }
@@ -172,10 +172,10 @@ static err_t connected_callback(void *arg, struct tcp_pcb *pcb, err_t err) {
     assert(false);
   }
   sprintf(request_str, "GET %s HTTP/1.1\r\n"
-                       "Host: %s\r\n"
-                       "Accept-Encoding: identity\r\n"
-                       "Connection: close\r\n"
-                       "%s\r\n", request->abs_path, request->host, request->request_header);
+          "Host: %s\r\n"
+          "Accept-Encoding: identity\r\n"
+          "Connection: close\r\n"
+          "%s\r\n", request->abs_path, request->host, request->request_header);
 
   // Send request
   write_log_crit("Writing <<<%s>>>\n", request->request_header);

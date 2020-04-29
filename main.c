@@ -159,10 +159,10 @@ void write_log_crit(const char* format, ...) {
   static LONG skipped_writes __PERSIST = 0;
 
   //FIXME: Possibly buffer data
-  #define PASSIVE_LEVEL 0 // Passive release level
-  #define LOW_LEVEL 0 // Lowest interrupt level
-  #define APC_LEVEL 1 // APC interrupt level
-  #define DISPATCH_LEVEL 2 // Dispatcher level
+#define PASSIVE_LEVEL 0 // Passive release level
+#define LOW_LEVEL 0 // Lowest interrupt level
+#define APC_LEVEL 1 // APC interrupt level
+#define DISPATCH_LEVEL 2 // Dispatcher level
   if (KeGetCurrentIrql() > PASSIVE_LEVEL) {
     InterlockedIncrement(&skipped_writes);
     return;
@@ -215,7 +215,7 @@ void write_log_crit(const char* format, ...) {
   //FIXME: Do this somewhere else?
   char loader_directory[520];
   strcpy(loader_directory, loader_path);
-	char *lastSlash = strrchr(loader_directory, '\\');
+  char *lastSlash = strrchr(loader_directory, '\\');
   *lastSlash = '\0';
   char log_path[520];
   sprintf(log_path, "%s\\log.txt", loader_directory);
@@ -247,16 +247,16 @@ static void memory_statistics() {
   ms.Length = sizeof(MM_STATISTICS);
   MmQueryStatistics(&ms);
   write_log("Memory statistics:\n");
-	#define PRINT(stat) write_log("- " #stat ": %d\n", ms.stat);
+#define PRINT(stat) write_log("- " #stat ": %d\n", ms.stat);
   PRINT(TotalPhysicalPages)
-  PRINT(AvailablePages)
-  PRINT(VirtualMemoryBytesCommitted)
-  PRINT(VirtualMemoryBytesReserved)
-  PRINT(CachePagesCommitted)
-  PRINT(PoolPagesCommitted)
-  PRINT(StackPagesCommitted)
-  PRINT(ImagePagesCommitted)
-}
+    PRINT(AvailablePages)
+    PRINT(VirtualMemoryBytesCommitted)
+    PRINT(VirtualMemoryBytesReserved)
+    PRINT(CachePagesCommitted)
+    PRINT(PoolPagesCommitted)
+    PRINT(StackPagesCommitted)
+    PRINT(ImagePagesCommitted)
+    }
 
 
 static uint32_t LookupKernelExport(unsigned int ordinal) {
@@ -283,8 +283,8 @@ static uint32_t LookupKernelExport(unsigned int ordinal) {
 
 VOID DECLSPEC_NORETURN NTAPI HookedHalReturnToFirmware
 (
-    IN FIRMWARE_REENTRY Routine
-) {
+  IN FIRMWARE_REENTRY Routine
+  ) {
   write_log("Calling HalReturnToFirmware(%d). Won't Return\n", Routine);
   if (LaunchDataPage != NULL) {
 
@@ -311,11 +311,11 @@ VOID DECLSPEC_NORETURN NTAPI HookedHalReturnToFirmware
 }
 
 NTSTATUS NTAPI HookedHalWriteSMBusValue(
-    IN UCHAR SlaveAddress,
-    IN UCHAR CommandCode,
-    IN BOOLEAN WriteWordValue,
-    IN ULONG DataValue
-) {
+  IN UCHAR SlaveAddress,
+  IN UCHAR CommandCode,
+  IN BOOLEAN WriteWordValue,
+  IN ULONG DataValue
+  ) {
 
   // Catch SMC access to LED Sequence and swap red and green
   if (SlaveAddress == 0x20 && CommandCode == 0x08 && !WriteWordValue) {
@@ -338,9 +338,9 @@ static char* get_ansi_buffer(PANSI_STRING o) {
 
 NTSTATUS NTAPI HookedIoCreateSymbolicLink
 (
-    IN POBJECT_STRING SymbolicLinkName,
-    IN POBJECT_STRING DeviceName
-) {
+  IN POBJECT_STRING SymbolicLinkName,
+  IN POBJECT_STRING DeviceName
+  ) {
   NTSTATUS status = IoCreateSymbolicLink(SymbolicLinkName, DeviceName);
   char* SymbolicLinkName_str = get_ansi_buffer(SymbolicLinkName);
   char* DeviceName_str = get_ansi_buffer(DeviceName);
@@ -364,20 +364,20 @@ PKTHREAD NTAPI HookedKeGetCurrentThread(void) {
 
 VOID NTAPI HookedKeInitializeDpc
 (
-    OUT KDPC *Dpc,
-    IN PKDEFERRED_ROUTINE DeferredRoutine,
-    IN PVOID DeferredContext OPTIONAL
-) {
+  OUT KDPC *Dpc,
+  IN PKDEFERRED_ROUTINE DeferredRoutine,
+  IN PVOID DeferredContext OPTIONAL
+  ) {
   KeInitializeDpc(Dpc, DeferredRoutine, DeferredContext);
   write_log("Called KeInitializeDpc(...).\n");
 }
 
 BOOLEAN NTAPI HookedKeSetTimer
 (
-    IN PKTIMER Timer,
-    IN LARGE_INTEGER DueTime,
-    IN PKDPC Dpc OPTIONAL
-) {
+  IN PKTIMER Timer,
+  IN LARGE_INTEGER DueTime,
+  IN PKDPC Dpc OPTIONAL
+  ) {
   BOOLEAN ret = KeSetTimer(Timer, DueTime, Dpc);
   write_log("Called KeSetTimer(..., DueTime={%d, %d}, ...). Returned %d\n", DueTime.HighPart, DueTime.LowPart, ret);
   return ret;
@@ -385,12 +385,12 @@ BOOLEAN NTAPI HookedKeSetTimer
 
 NTSTATUS NTAPI HookedNtAllocateVirtualMemory
 (
-    IN OUT PVOID *BaseAddress,
-    IN ULONG_PTR ZeroBits,
-    IN OUT PSIZE_T RegionSize,
-    IN ULONG AllocationType,
-    IN ULONG Protect
-) {
+  IN OUT PVOID *BaseAddress,
+  IN ULONG_PTR ZeroBits,
+  IN OUT PSIZE_T RegionSize,
+  IN ULONG AllocationType,
+  IN ULONG Protect
+  ) {
 
   memory_statistics();
 
@@ -403,16 +403,16 @@ NTSTATUS NTAPI HookedNtAllocateVirtualMemory
 
 NTSTATUS NTAPI HookedNtCreateFile
 (
-    OUT PHANDLE FileHandle,
-    IN ACCESS_MASK DesiredAccess,
-    IN POBJECT_ATTRIBUTES ObjectAttributes,
-    OUT PIO_STATUS_BLOCK IoStatusBlock,
-    IN PLARGE_INTEGER AllocationSize OPTIONAL,
-    IN ULONG FileAttributes,
-    IN ULONG ShareAccess,
-    IN ULONG CreateDisposition,
-    IN ULONG CreateOptions
-) {
+  OUT PHANDLE FileHandle,
+  IN ACCESS_MASK DesiredAccess,
+  IN POBJECT_ATTRIBUTES ObjectAttributes,
+  OUT PIO_STATUS_BLOCK IoStatusBlock,
+  IN PLARGE_INTEGER AllocationSize OPTIONAL,
+  IN ULONG FileAttributes,
+  IN ULONG ShareAccess,
+  IN ULONG CreateDisposition,
+  IN ULONG CreateOptions
+  ) {
   NTSTATUS status = NtCreateFile(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions);
 #if 0
   char* path = get_ansi_buffer(ObjectAttributes->ObjectName);
@@ -424,17 +424,17 @@ NTSTATUS NTAPI HookedNtCreateFile
 
 NTSTATUS NTAPI HookedNtQueryVirtualMemory
 (
-    IN PVOID BaseAddress,
-    OUT PMEMORY_BASIC_INFORMATION MemoryInformation
-) {
+  IN PVOID BaseAddress,
+  OUT PMEMORY_BASIC_INFORMATION MemoryInformation
+  ) {
   NTSTATUS status = NtQueryVirtualMemory(BaseAddress, MemoryInformation);
   write_log("Called NtQueryVirtualMemory(%d, %d). Returned %d\n", BaseAddress, MemoryInformation, status);
   return status;
 }
 
 DWORD NTAPI HookedPhyGetLinkState(
-    BOOLEAN update
-) {
+  BOOLEAN update
+  ) {
 #ifdef HOOK_NIC
   // @param update
   // @return Flags describing the status of the NIC
@@ -451,9 +451,9 @@ DWORD NTAPI HookedPhyGetLinkState(
 
 NTSTATUS NTAPI HookedPhyInitialize
 (
-    BOOLEAN forceReset,
-    PVOID param OPTIONAL
-) {
+  BOOLEAN forceReset,
+  PVOID param OPTIONAL
+  ) {
 #ifdef HOOK_NIC
   // @param forceReset Whether to force a reset
   // @param param Optional parameters (seemingly unused)
@@ -471,17 +471,17 @@ NTSTATUS NTAPI HookedPhyInitialize
 
 NTSTATUS NTAPI HookedPsCreateSystemThreadEx
 (
-    OUT PHANDLE ThreadHandle,
-    IN SIZE_T ThreadExtensionSize,
-    IN SIZE_T KernelStackSize,
-    IN SIZE_T TlsDataSize,
-    OUT PHANDLE ThreadId OPTIONAL,
-    IN PKSTART_ROUTINE StartRoutine,
-    IN PVOID StartContext,
-    IN BOOLEAN CreateSuspended,
-    IN BOOLEAN DebuggerThread,
-    IN PKSYSTEM_ROUTINE SystemRoutine OPTIONAL
-) {
+  OUT PHANDLE ThreadHandle,
+  IN SIZE_T ThreadExtensionSize,
+  IN SIZE_T KernelStackSize,
+  IN SIZE_T TlsDataSize,
+  OUT PHANDLE ThreadId OPTIONAL,
+  IN PKSTART_ROUTINE StartRoutine,
+  IN PVOID StartContext,
+  IN BOOLEAN CreateSuspended,
+  IN BOOLEAN DebuggerThread,
+  IN PKSYSTEM_ROUTINE SystemRoutine OPTIONAL
+  ) {
   NTSTATUS status = PsCreateSystemThreadEx(ThreadHandle, ThreadExtensionSize, KernelStackSize, TlsDataSize, ThreadId, StartRoutine, StartContext, CreateSuspended, DebuggerThread, SystemRoutine);
   write_log("Called PsCreateSystemThreadEx(...). Returned %d (thread handle: %d)\n", status, *ThreadHandle);
   return status;
@@ -489,17 +489,17 @@ NTSTATUS NTAPI HookedPsCreateSystemThreadEx
 
 VOID NTAPI HookedRtlZeroMemory
 (
-    IN VOID UNALIGNED *Destination,
-    IN SIZE_T Length
-) {
+  IN VOID UNALIGNED *Destination,
+  IN SIZE_T Length
+  ) {
   RtlZeroMemory(Destination, Length);
   write_log("Called RtlZeroMemory(...).\n");
 }
 
 NTSTATUS NTAPI HookedXeLoadSection
 (
-    IN PXBEIMAGE_SECTION Section
-) {
+  IN PXBEIMAGE_SECTION Section
+  ) {
   NTSTATUS status = XeLoadSection(Section);
   write_log("Called XeLoadSection(...). Returned %d\n", status);
   return status;
@@ -723,10 +723,10 @@ static Xbe* load_xbe(const char* path, uint32_t base_address, bool allow_hooks) 
       write_log(" @%d", ordinal);
       *kernel_thunk = LookupKernelExport(ordinal);
 
-        //FIXME: Hook those functions which might reboot the Xbox or would make us loose control otherwise
+      //FIXME: Hook those functions which might reboot the Xbox or would make us loose control otherwise
 
-        //FIXME: This would be bad if loader does not persist.
-        //       We need to keep track of all modules so we can relocate?
+      //FIXME: This would be bad if loader does not persist.
+      //       We need to keep track of all modules so we can relocate?
       if (allow_hooks) {
 
 #if 1
@@ -1028,7 +1028,7 @@ int main() {
   // Remount D: drive
   char xbe_directory[520];
   strcpy(xbe_directory, xbe_path);
-	char *lastSlash = strrchr(xbe_directory, '\\');
+  char *lastSlash = strrchr(xbe_directory, '\\');
   *lastSlash = '\0';
   XMountDrive('D', xbe_directory);
   write_log("Remapped DVD drive to '%s'\n", xbe_directory);
