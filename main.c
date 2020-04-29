@@ -1,4 +1,4 @@
-#define QUIET
+//#define QUIET
 #define USE_XISO
 //#define HOOK_NIC
 
@@ -29,30 +29,6 @@
 #include "xiso_driver.h"
 #endif
 
-#if 0
-// We use AllocatePool, to avoid filling up the interesting memory regions
-//FIXME: Instead, keep track of all allocations, so we can undo it
-//FIXME: This is still very unstable; we should be reserving more space for our own XBE instead
-//       The issue is that real NtVirtualAlloc is still being used in the stdlib
-#define malloc(x) ExAllocatePool(x)
-#define free(x) ExFreePool(x)
-char* strdup_moved(const char* x) {
-  char* s = ExAllocatePool(strlen(x) + 1);
-  strcpy(s, x);
-  return s;
-}
-void* realloc_moved(void* x, size_t v) {
-  void* s = malloc(v);
-  if (x != NULL) {
-    ULONG ov = ExQueryPoolBlockSize(x);
-    memcpy(s, x, ov);
-    free(x);
-  }
-  return s;
-}
-#define strdup(a) strdup_moved(a)
-#define realloc(a, b) realloc_moved(a, b)
-#endif
 
 // Section will be copied to new versions of loader
 #define __PERSIST_NAME "!persist"
@@ -801,8 +777,6 @@ int main() {
 #ifndef QUIET
   // Setup debug output
   XVideoSetMode(640, 480, 32, REFRESH_DEFAULT);
-  pb_init();
-  pb_show_debug_screen();
 #endif
 
 #if 1
