@@ -77,7 +77,7 @@ void http_client_request(const char* host, unsigned short host_port, const char*
   ) {
   // Lookup host
   //FIXME: Might want to do this elsewhere?
-  ip4_addr_t host_ip;
+  ip_addr_t host_ip;
 #if 0 //LWIP_DNS
   debugPrint("Resolving hostname '%s'\n", host);
   err_t err = netconn_gethostbyname (host, &host_ip);
@@ -85,8 +85,8 @@ void http_client_request(const char* host, unsigned short host_port, const char*
     assert(false);
   }
 #else
-  IP4_ADDR(&host_ip, 192,168,177,1);
-  host = ip4addr_ntoa(&host_ip);
+  IP_ADDR4(&host_ip, 192,168,177,1);
+  host = ipaddr_ntoa(&host_ip);
 #endif
 
   // Keep track of the request in an object
@@ -94,6 +94,7 @@ void http_client_request(const char* host, unsigned short host_port, const char*
   if (request == NULL) {
     assert(false);
   }
+
 
   // Fill out all state information
   request->host = strdup(host);
@@ -112,7 +113,7 @@ void http_client_request(const char* host, unsigned short host_port, const char*
   request->received_bytes = 0;
   request->user = user;
 
-  debugPrint("Will request '%s' from '%s' (%s) port %d\n", request->abs_path, request->host, ip4addr_ntoa(&host_ip), host_port);
+  debugPrint("Will request '%s' from '%s' (%s) port %d\n", request->abs_path, request->host, ipaddr_ntoa(&host_ip), host_port);
 
   // Create a new PCB for our request
   request->pcb = tcp_new();
